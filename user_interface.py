@@ -40,7 +40,27 @@ class UserInterface:
     def open_stocks(self):
         self.stock_window = Toplevel(self.window)
         self.stock_window.title("Stock Data")
-        self.response = data.get_quote()
+        treeview = ttk.Treeview(self.stock_window, style="BW.TLabel", columns=("Name", "Currency", "Date", "Open","Close",
+                                                                               "Percent Change", "Yearly High", "Yearly Low"))
+        treeview.heading("#0", text="Symbol")
+        treeview.heading("Name", text="Name")
+        treeview.heading("Currency", text="Currency")
+        treeview.heading("Date", text="Date")
+        treeview.heading("Open", text="Open")
+        treeview.heading("Close", text="Close")
+        treeview.heading("Percent Change", text="Percent Change")
+        treeview.heading("Yearly High", text="Yearly High")
+        treeview.heading("Yearly Low", text="Yearly Low")
+
+        self.first_level = treeview.insert('', 'end', text="My Financial Actives")
+
+        for item in self.response:
+            treeview.insert(self.first_level, 'end', text=item["symbol"], values=(f"{item['name']}",f"{item.get('currency', 'USD')}", f"{item['datetime']}", f"{item['open']}",
+                                                                                  f"{item['close']}",f"{item['percent_change']}",
+                                                                                  f"{item['fifty_two_week']["high"]}",f"{item['fifty_two_week']["low"]}"))
+
+
+        treeview.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
         pass
     def add_stocks(self):
         pass
