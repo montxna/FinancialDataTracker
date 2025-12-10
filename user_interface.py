@@ -38,6 +38,7 @@ class UserInterface:
 
 
     def open_stocks(self):
+        self.response = data.get_quote()
         self.stock_window = Toplevel(self.window)
         self.stock_window.title("Stock Data")
         treeview = ttk.Treeview(self.stock_window, style="BW.TLabel", columns=("Name", "Currency", "Date", "Open","Close",
@@ -54,10 +55,17 @@ class UserInterface:
 
         self.first_level = treeview.insert('', 'end', text="My Financial Actives")
 
+        treeview.tag_configure('priceUp', foreground='light green')
+        treeview.tag_configure('priceDown', foreground='red')
+
         for item in self.response:
+            if float(item['percent_change']) > 0:
+                usedTag = "priceUp"
+            else:
+                usedTag = "priceDown"
             treeview.insert(self.first_level, 'end', text=item["symbol"], values=(f"{item['name']}",f"{item.get('currency', 'USD')}", f"{item['datetime']}", f"{item['open']}",
                                                                                   f"{item['close']}",f"{item['percent_change']}",
-                                                                                  f"{item['fifty_two_week']["high"]}",f"{item['fifty_two_week']["low"]}"))
+                                                                                  f"{item['fifty_two_week']["high"]}",f"{item['fifty_two_week']["low"]}"), tags=f"{usedTag}")
 
 
         treeview.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
