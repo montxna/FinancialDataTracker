@@ -15,7 +15,6 @@ class DataAnalysis():
         csvfile = pd.read_csv("list_of_finance.csv", header=None)
         self.list_of_finance.append(csvfile[0].tolist())
         self.list_of_finance.append(csvfile[1].tolist())
-        print(self.list_of_finance)
     def get_quote(self):
         list_of_data = []
 
@@ -29,6 +28,7 @@ class DataAnalysis():
                 }
 
                 response = requests.get(url = TWELVEDATA_QUOTE, params = self.twelvedata_params)
+                response.raise_for_status()
                 data = response.json()
                 #Converts timestamp from Unix to a date
                 data["timestamp"] = str(pd.to_datetime(data["timestamp"], unit = "s"))
@@ -36,6 +36,8 @@ class DataAnalysis():
 
             list_of_data.append(row_list)
         return list_of_data
+    def get_list(self):
+        return self.list_of_finance
 
 
 

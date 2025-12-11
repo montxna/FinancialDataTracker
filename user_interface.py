@@ -39,12 +39,26 @@ class UserInterface:
 
     def open_stocks(self):
         '''This function opens the stocks window'''
+        StockViewWindow(self.window, data)
+    def add_stocks(self):
+        '''This function opens the window to add, edit or remove actives'''
+        StockEditorWindow(self.window,data)
+
+    def add_edit_mail(self):
+        pass
+
+class StockViewWindow(Toplevel):
+    def __init__(self, master, data_analysis):
+        super().__init__(master)
+        self.data = data_analysis
         self.response = data.get_quote()
-        print(self.response)
-        self.stock_window = Toplevel(self.window)
-        self.stock_window.title("Financial Data")
-        treeview = ttk.Treeview(self.stock_window, style="BW.TLabel", columns=("Name", "Currency", "Date", "Open","Close",
-                                                                               "Percent Change", "Yearly High", "Yearly Low"))
+        self.title("Financial Data")
+        self._setup_ui()
+
+    def _setup_ui(self):
+        treeview = ttk.Treeview(self, style="BW.TLabel",
+                                columns=("Name", "Currency", "Date", "Open", "Close",
+                                         "Percent Change", "Yearly High", "Yearly Low"))
         treeview.heading("#0", text="Symbol")
         treeview.heading("Name", text="Name")
         treeview.heading("Currency", text="Currency")
@@ -72,15 +86,55 @@ class UserInterface:
 
                 treeview.insert(node_level, 'end', text=item["symbol"], values=(f"{item['name']}",
                                                                                 f"{item.get('currency', 'USD')}",
-                                                                                f"{item['datetime']}", f"{item['open']}",
-                                                                                  f"{item['close']}",f"{item['percent_change']}",
-                                                                                  f"{item['fifty_two_week']["high"]}",
+                                                                                f"{item['datetime']}",
+                                                                                f"{item['open']}",
+                                                                                f"{item['close']}",
+                                                                                f"{item['percent_change']}",
+                                                                                f"{item['fifty_two_week']["high"]}",
                                                                                 f"{item['fifty_two_week']["low"]}"),
-                                                                                    tags=f"{usedTag}")
+                                tags=f"{usedTag}")
 
         treeview.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
-        pass
-    def add_stocks(self):
-        pass
-    def add_edit_mail(self):
-        pass
+
+
+
+
+
+class StockEditorWindow(Toplevel):
+    def __init__(self, master, data_controller):
+        super().__init__(master)
+        self.data = data_controller
+        self.title("Stock Editor")
+        self.list_of_finance = data.get_list()
+        self.list_of_stocks = self.list_of_finance[0]
+        self.list_of_crypto = self.list_of_finance[1]
+        self.actives_list = ["Stocks", "Crypto"]
+        self._setup_ui()
+    def _setup_ui(self):
+        self.combobox = ttk.Combobox(self, values=self.actives_list, state="readonly")
+        self.combobox.set("Select an active")
+        self.combobox.pack(pady=10, padx=10)
+        self.button = ttk.Button(self, text="Show Selection", command=self.show_actives)
+        self.button.pack(pady=10, padx=10)
+        self.listbox = Listbox(self)
+        self.listbox.pack(pady=10, padx=10)
+
+
+
+
+
+
+
+
+    def show_actives(self):
+        self.listbox.delete(0, END)
+        option = self.combobox.get()
+        if option == "Stocks":
+            for item in self.list_of_stocks:
+                self.listbox.insert(END, item)
+        elif option == "Crypto":
+            for item in self.list_of_crypto:
+                self.listbox.insert(END, item)
+
+
+
