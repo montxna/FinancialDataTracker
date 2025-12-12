@@ -82,17 +82,20 @@ class StockViewWindow(Toplevel):
 
         for data_list, node_level in categories:
             for item in data_list:
-                usedTag = "priceUp" if float(item['percent_change']) > 0 else "priceDown"
 
-                treeview.insert(node_level, 'end', text=item["symbol"], values=(f"{item['name']}",
-                                                                                f"{item.get('currency', 'USD')}",
-                                                                                f"{item['datetime']}",
-                                                                                f"{item['open']}",
-                                                                                f"{item['close']}",
-                                                                                f"{item['percent_change']}",
-                                                                                f"{item['fifty_two_week']["high"]}",
-                                                                                f"{item['fifty_two_week']["low"]}"),
-                                tags=f"{usedTag}")
+                try:
+                    usedTag = "priceUp" if float(item['percent_change']) > 0 else "priceDown"
+                    treeview.insert(node_level, 'end', text=item["symbol"], values=(f"{item['name']}",
+                                                                                    f"{item.get('currency', 'USD')}",
+                                                                                    f"{item['datetime']}",
+                                                                                    f"{item['open']}",
+                                                                                    f"{item['close']}",
+                                                                                    f"{item['percent_change']}",
+                                                                                    f"{item['fifty_two_week']["high"]}",
+                                                                                    f"{item['fifty_two_week']["low"]}"),
+                                    tags=f"{usedTag}")
+                except KeyError:
+                    pass
 
         treeview.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
 
@@ -114,27 +117,43 @@ class StockEditorWindow(Toplevel):
         self.combobox = ttk.Combobox(self, values=self.actives_list, state="readonly")
         self.combobox.set("Select an active")
         self.combobox.pack(pady=10, padx=10)
-        self.button = ttk.Button(self, text="Show Selection", command=self.show_actives)
+        self.button = Button(self, text="Show Selection", command=self.show_actives)
         self.button.pack(pady=10, padx=10)
         self.listbox = Listbox(self)
         self.listbox.pack(pady=10, padx=10)
+        self.listbox.bind("<Button-3>", self.popup)
+        self.popup_menu = Menu(self, tearoff=0)
+        self.popup_menu.add_command(label="Delete", command=self.delete_selected)
 
 
+    def popup(self, event):
+        if self.listbox.curselection():
+            try:
+                self.popup_menu.tk_popup(event.x_root, event.y_root, 0)
+            finally:
+                self.popup_menu.grab_release()
+    def delete_selected(self):
+        item_to_remove = self.listbox.get(self.listbox.curselection())
+        data.remove_item(item_to_remove)
+        data.refresh_lists()
+        self.list_of_finance = data.get_list()
+        self.list_of_stocks = self.list_of_finance[0]
+        self.list_of_crypto = self.list_of_finance[1]
 
+        data.get_list()
 
-
-
-
-
+        self.show_actives()
     def show_actives(self):
         self.listbox.delete(0, END)
         option = self.combobox.get()
         if option == "Stocks":
-            for item in self.list_of_stocks:
-                self.listbox.insert(END, item)
+            list = self.list_of_stocks
         elif option == "Crypto":
-            for item in self.list_of_crypto:
+            list = self.list_of_crypto
+        try:
+            for item in list:
                 self.listbox.insert(END, item)
-
+        except UnboundLocalError:
+            pass
 
 

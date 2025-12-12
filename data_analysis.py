@@ -12,9 +12,11 @@ TWELVEDATA_QUOTE = "https://api.twelvedata.com/quote"
 class DataAnalysis():
     def __init__(self):
         self.list_of_finance = []
-        csvfile = pd.read_csv("list_of_finance.csv", header=None)
-        self.list_of_finance.append(csvfile[0].tolist())
-        self.list_of_finance.append(csvfile[1].tolist())
+        self.csvfile = pd.read_csv("list_of_finance.csv", header=None)
+        self.csvfile = self.csvfile.fillna("")
+        self.list_of_finance.append(self.csvfile[0].tolist())
+        self.list_of_finance.append(self.csvfile[1].tolist())
+
     def get_quote(self):
         list_of_data = []
 
@@ -31,14 +33,30 @@ class DataAnalysis():
                 response.raise_for_status()
                 data = response.json()
                 #Converts timestamp from Unix to a date
-                data["timestamp"] = str(pd.to_datetime(data["timestamp"], unit = "s"))
+                try:
+                    data["timestamp"] = str(pd.to_datetime(data["timestamp"], unit = "s"))
+                except KeyError:
+                    pass
                 row_list.append(data)
 
             list_of_data.append(row_list)
         return list_of_data
+
     def get_list(self):
         return self.list_of_finance
 
+    def remove_item(self, item):
+        self.csvfile = self.csvfile.replace(f"{item}", "")
+        self.csvfile.to_csv("list_of_finance.csv", index = False, header = False)
+        self.refresh_lists()
+
+
+    def refresh_lists(self):
+        self.list_of_finance = []
+        self.csvfile = pd.read_csv("list_of_finance.csv", header=None)
+        self.csvfile = self.csvfile.fillna("")
+        self.list_of_finance.append(self.csvfile[0].tolist())
+        self.list_of_finance.append(self.csvfile[1].tolist())
 
 
 
