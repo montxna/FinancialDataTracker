@@ -15,10 +15,9 @@ class DataAnalysis():
     def __init__(self):
         self.list_of_finance = []
         try:
-            self.csvfile = pd.read_csv("list_of_finance.csv", header=None)
-            self.csvfile = self.csvfile.fillna("")
-            self.list_of_finance.append(self.csvfile[0].tolist())
-            self.list_of_finance.append(self.csvfile[1].tolist())
+            self.csvfile = pd.read_csv("list_of_finance.csv")
+            self.list_of_finance.append(self.csvfile["Stock"].dropna().tolist())
+            self.list_of_finance.append(self.csvfile["Crypto"].dropna().tolist())
         except pandas.errors.EmptyDataError:
             pass
     def get_quote(self):
@@ -53,16 +52,32 @@ class DataAnalysis():
 
     def remove_item(self, item):
         self.csvfile = self.csvfile.replace(f"{item}", "")
-        self.csvfile.to_csv("list_of_finance.csv", index = False, header = False)
+        self.csvfile.to_csv("list_of_finance.csv", index = False)
+    def add_item(self, stocks, crypto):
+        updated_data = {
+            "Stock": pd.Series(stocks),
+            "Crypto": pd.Series(crypto)
+        }
+        df = pd.DataFrame(updated_data)
+        df.to_csv("list_of_finance.csv", index = False)
         self.refresh_lists()
+    def read_possible_finance(self):
+        self.list_possible_actives = []
+        try:
+            self.csvfilepos = pd.read_csv("possible_actives.csv", header=None)
+            self.csvfilepos = self.csvfilepos.fillna("")
+            self.list_possible_actives.append(self.csvfilepos[0].tolist())
+            self.list_possible_actives.append(self.csvfilepos[1].tolist())
+        except pandas.errors.EmptyDataError:
+            pass
+        return self.list_possible_actives
 
 
     def refresh_lists(self):
         self.list_of_finance = []
-        self.csvfile = pd.read_csv("list_of_finance.csv", header=None)
-        self.csvfile = self.csvfile.fillna("")
-        self.list_of_finance.append(self.csvfile[0].tolist())
-        self.list_of_finance.append(self.csvfile[1].tolist())
+        self.csvfile = pd.read_csv("list_of_finance.csv")
+        self.list_of_finance.append(self.csvfile["Stock"].dropna().tolist())
+        self.list_of_finance.append(self.csvfile["Crypto"].dropna().tolist())
 
 
 

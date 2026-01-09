@@ -142,8 +142,40 @@ class StockEditorWindow(Toplevel):
                 self.popup_menu.tk_popup(event.x_root, event.y_root, 0)
             finally:
                 self.popup_menu.grab_release()
+
+
+
     def add_active(self):
-        pass
+        """AICI TREBUIE SA FAC UN WINDOW PESTE STOCKEDITOR CU ACELEASI ELEMENTE, COMBO,LIST DE UNDE SE VOR LUA
+        ELEMENTELE DIN POSSIBLE ACTIVES PENTRU STOCKS SI CRYPTO, LA ALEGERE SE ADAUGA IN LIST OF FINANCE, SE VERIFICA
+        IN PREALABIL DACA SUNT DEJA IN LIST OF FINANCE, ASTFEL NU LE MAI DAU APPEND IN LISTBOX"""
+        self.add_toplevel = Toplevel(self)
+        self.add_toplevel.title("Add an Active")
+        self.listpos = data.read_possible_finance()
+        self.list_of_stocksadd = self.listpos[0]
+        self.list_of_cryptoadd = self.listpos[1]
+        self.comboboxadd = ttk.Combobox(self.add_toplevel, values=self.actives_list, state="readonly")
+        self.comboboxadd.set("Select an active")
+        self.comboboxadd.pack(pady=10, padx=10)
+        self.buttonshow = Button(self.add_toplevel, text="Show Selection", command=self.show_actives_pos)
+        self.buttonshow.pack(pady=10, padx=10)
+        self.listboxadd = Listbox(self.add_toplevel)
+        self.listboxadd.pack(pady=10, padx=10)
+        self.buttonadd = Button(self.add_toplevel, text="Add", command=self.modify_list)
+        self.buttonadd.pack(pady=10, padx=10)
+
+
+
+    def modify_list(self):
+        self.itemtoadd = self.listboxadd.get(self.listboxadd.curselection())
+        self.activetoadd = self.comboboxadd.get()
+        if self.activetoadd == "Stocks":
+            self.list_of_stocks.append(self.itemtoadd)
+        elif self.activetoadd == "Crypto":
+            self.list_of_crypto.append(self.itemtoadd)
+        data.add_item(self.list_of_stocks, self.list_of_crypto)
+        messagebox.showinfo(title="Success", message="The active has been successfully added.")
+
     def delete_selected(self):
         item_to_remove = self.listbox.get(self.listbox.curselection())
         data.remove_item(item_to_remove)
@@ -155,6 +187,7 @@ class StockEditorWindow(Toplevel):
         data.get_list()
 
         self.show_actives()
+        messagebox.showinfo(title="Success", message="The active has been successfully deleted.")
     def show_actives(self):
         self.listbox.delete(0, END)
         option = self.combobox.get()
@@ -168,4 +201,17 @@ class StockEditorWindow(Toplevel):
         except UnboundLocalError:
             pass
 
+    def show_actives_pos(self):
+        self.listboxadd.delete(0, END)
+        option = self.comboboxadd.get()
+        if option == "Stocks":
+            list = self.list_of_stocksadd
+        elif option == "Crypto":
+            list = self.list_of_cryptoadd
+        try:
+            for item in list:
+                if item not in self.list_of_crypto and item not in self.list_of_stocks:
+                    self.listboxadd.insert(END, item)
+        except UnboundLocalError:
+            pass
 
