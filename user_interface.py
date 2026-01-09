@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import ttk, messagebox
 from data_analysis import DataAnalysis
+import ttkbootstrap as ttkb
+from ttkbootstrap.constants import *
 import smtplib
 
 data = DataAnalysis()
@@ -9,7 +11,7 @@ data = DataAnalysis()
 class UserInterface:
     '''This class manages the user interface made in TKinter, and the adjacent windows'''
     def __init__(self):
-        self.window = Tk()
+        self.window = ttkb.Window(themename="superhero")
         self.window.title("Financial Data Tracker")
 
         self.style = ttk.Style()
