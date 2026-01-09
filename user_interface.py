@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from data_analysis import DataAnalysis
 import smtplib
 
@@ -38,10 +38,15 @@ class UserInterface:
 
 
     def open_stocks(self):
-        '''This function opens the stocks window'''
-        StockViewWindow(self.window, data)
+        if data.get_quote() != []:
+            '''This function opens the stocks window'''
+            StockViewWindow(self.window, data)
+        else:
+            messagebox.showerror("Error", "Please enter your financial data first!")
     def add_stocks(self):
         '''This function opens the window to add, edit or remove actives'''
+        if data.get_quote() == []:
+            messagebox.showwarning("Warning", "Your actives list is empty. Please enter your financial data first!")
         StockEditorWindow(self.window,data)
 
     def add_edit_mail(self):
@@ -82,7 +87,6 @@ class StockViewWindow(Toplevel):
 
         for data_list, node_level in categories:
             for item in data_list:
-
                 try:
                     usedTag = "priceUp" if float(item['percent_change']) > 0 else "priceDown"
                     treeview.insert(node_level, 'end', text=item["symbol"], values=(f"{item['name']}",
@@ -109,8 +113,12 @@ class StockEditorWindow(Toplevel):
         self.data = data_controller
         self.title("Stock Editor")
         self.list_of_finance = data.get_list()
-        self.list_of_stocks = self.list_of_finance[0]
-        self.list_of_crypto = self.list_of_finance[1]
+        try:
+            self.list_of_stocks = self.list_of_finance[0]
+            self.list_of_crypto = self.list_of_finance[1]
+        except IndexError:
+            self.list_of_stocks = []
+            self.list_of_crypto = []
         self.actives_list = ["Stocks", "Crypto"]
         self._setup_ui()
     def _setup_ui(self):
@@ -119,6 +127,8 @@ class StockEditorWindow(Toplevel):
         self.combobox.pack(pady=10, padx=10)
         self.button = Button(self, text="Show Selection", command=self.show_actives)
         self.button.pack(pady=10, padx=10)
+        self.add_button = Button(self, text = "Add an active", command=self.add_active)
+        self.add_button.pack(pady=10, padx=10)
         self.listbox = Listbox(self)
         self.listbox.pack(pady=10, padx=10)
         self.listbox.bind("<Button-3>", self.popup)
@@ -132,6 +142,8 @@ class StockEditorWindow(Toplevel):
                 self.popup_menu.tk_popup(event.x_root, event.y_root, 0)
             finally:
                 self.popup_menu.grab_release()
+    def add_active(self):
+        pass
     def delete_selected(self):
         item_to_remove = self.listbox.get(self.listbox.curselection())
         data.remove_item(item_to_remove)
